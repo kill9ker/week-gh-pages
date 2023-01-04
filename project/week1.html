@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品頁面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <style>
+        img {
+            object-fit: contain;
+            max-width: 100%;
+            }
+
+        .primary-image {
+            height: 300px;
+            }
+
+        .images {
+            height: 150px;
+            }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="row py-3">
+                <div class="col-md-6">
+                    <h2>產品列表</h2>
+                    <table class="table table-hover mt-4">
+                        <thead>
+                            <tr>
+                                <th width="150">產品名稱</th>
+                                <th width="120">
+                                    原價
+                                </th>
+                                <th width="120">
+                                    售價
+                                </th>
+                                <th width="150">
+                                    是否啟用
+                                </th>
+                                <th width="120">
+                                    查看細節
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item) in products" :key="item.id">
+                                <td width="150">{{ item.title }}</td>
+                                <td width="120">
+                                    {{ item.origin_price }}
+                                </td>
+                                <td width="120">
+                                    {{ item.price }}
+                                </td>
+                                <td width="150">
+                                    <span v-if="item.is_enabled" class="text-success">啟用</span>
+                                    <span v-else>未啟用</span>
+                                </td>
+                                <td width="120">
+                                    <button type="button" class="btn btn-primary" id="getProducts"
+                                        v-on:click="openProduct(item)">查看細節</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>目前有 <span>{{ products.length }}</span> 項產品</p>
+                </div>
+    
+                <div class="col-md-6">
+                    <h2>單一產品細節</h2>
+                    <template v-if="tempProduct.title">
+                        <div class="card mb-3">
+                            <img v-bind:src="tempProduct.imageUrl" class="card-img-top primary-image" alt="主圖">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {{ tempProduct.title }}
+                                    <span class="badge bg-primary ms-2">{{ tempProduct.category }}</span>
+                                </h5>
+                                <p class="card-text">商品描述：{{ tempProduct.description }}</p>
+                                <p class="card-text">商品內容：{{ tempProduct.context }}</p>
+                                <div class="d-flex">
+                                    <p class="card-text me-2">{{ tempProduct.price }}</p>
+                                    <p class="card-text text-secondary"><del>{{ tempProduct.origin_price }}</del></p>
+                                    {{ tempProduct.unit }} / 元
+                                </div>
+                            </div>
+                        </div>
+                        <template v-for="item in tempProduct.imagesUrl">
+                            <img v-bind:src="item" alt="" class="images m-2">
+                        </template>
+                    </template>
+                    <p class="text-secondary">請選擇一個商品查看</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 載入套件 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js'
+        integrity='sha512-Xk3wWei2TGrsh9kDSBKUMIjw/86sLUvhtnv9f7fOuIwhhiUTKz8szkWkzHthrM5Bb3Bu9idSzkxOrkzhcneuiw=='
+        crossorigin='anonymous'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+        integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
+        integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
+        crossorigin="anonymous"></script>
+    <script>
+        // 先取得資料
+        const { createApp } = Vue;
+        const url = 'https://vue3-course-api.hexschool.io/v2'; //加入站點
+        const path = 'kill9ker123';
+        //     // 起手式準備資料及方法，資料要符合api登入的文件要求，然後到畫面上做v-model雙向綁定，才能取得到
+        
+            Vue.createApp({
+                data() {
+                    return {
+                        url: 'https://vue3-course-api.hexschool.io/v2',
+                        path: 'kill9ker123',
+                        products: [],
+                        tempProduct: {},
+                    }
+                },
+                methods: {
+                    checkAdmin() {
+                        const url = `${url}/api/user/check`;
+                        axios.post(url)
+                            .then(() => {
+                                this.getData();
+                            })
+                            .catch((err) => {
+                                console.log(err.data.message);
+                                window.location = 'login.html';
+                            });
+                    },
+                    getData() {
+                        const url = `${this.url}/api/${this.path}/admin/products`;
+                        axios.get(url)
+                            .then((response) => {
+                                console.log(response);
+                                this.products = response.data.products;
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
+                    },
+                    openProduct(item) {
+                        this.tempProduct = item;
+                    },
+                },
+                mounted() {
+                    // 取出 Token
+                    const token = document.cookie.replace(
+                        /(?:(?:^|.*;\s*)myToken\s*=\s*([^;]*).*$)|^.*$/,
+                        '$1'
+                    );
+                    axios.defaults.headers.common.Authorization = token;
+                    this.getData();
+                    // this.checkAdmin();               
+                },
+            }).mount('#app')
+    </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入頁面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <style>
+        html,
+        body {
+            height: 100%;
+            text-align: center;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-signin {
+            width: 100%;
+            max-width: 330px;
+            padding: 15px;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="row justify-content-center">
+                <h1 class="h3 mb-3 font-weight-normal">
+                    請先登入
+                </h1>
+                <div class="col-8">
+                    <form id="form" class="form-signin">
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" placeholder="name@example.com"
+                                required autofocus v-model="user.username">
+                            <label for="username">Email address</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="password" placeholder="Password" required v-model="user.password">
+                            <label for="password">Password</label>
+                        </div>
+                        <button class="btn btn-lg btn-primary w-100 mt-3" id="login" type="button" v-on:click.prevent="login">
+                            登入
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <p class="mt-5 mb-3 text-muted">
+                &copy; 2021~∞ - 六角學院
+            </p>
+        </div>
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js'
+        integrity='sha512-Xk3wWei2TGrsh9kDSBKUMIjw/86sLUvhtnv9f7fOuIwhhiUTKz8szkWkzHthrM5Bb3Bu9idSzkxOrkzhcneuiw=='
+        crossorigin='anonymous'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+        integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
+        integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
+        crossorigin="anonymous"></script>
+    
+    <script>
+    // 該載入的套件都先載入，解構取得createApp的方法
+    const { createApp } = Vue
+    const url = 'https://vue3-course-api.hexschool.io/v2'; //加入站點
+    // 起手式準備資料及方法，資料要符合api登入的文件要求，然後到畫面上做v-model雙向綁定，才能取得到
+    createApp({
+        data() {
+            return {
+                user: {
+                    username: '',
+                    password: '',
+                },
+            }
+        },
+        methods: {
+            login() {
+                console.log(this.user);
+                axios.post(`${url}/admin/signin`, this.user)
+                    .then((response) => {
+                        const { token, expired } = response.data;
+                        // 寫入 cookie token
+                        // expires 設置有效時間
+                        document.cookie = `myToken=${token};expires=${new Date(
+                            expired
+                        )}; path=/`;
+                        window.location = 'week1.html';
+                    })
+                    .catch((err) => {
+                        alert(err.data.message);
+                    });
+            },
+        },
+    }).mount('#app')//用mount方法生成畫面DOM上
+    // ------------------比較原生的JS方法----------------
+    // const url = 'https//:vue3-course-api.hexschool.io/v2';
+    
+    //     const username = document.querySelector('#username');
+    //     const password = document.querySelector('#password');
+    //     const btn = document.querySelector('#btn');
+
+    //     btn.addEventLister;
+
+    //     function login() {
+    //         const username = username.value;
+    //         const password = password.value;
+
+    //         const user = {
+    //             username,
+    //             password
+    //         }
+    //         // 發送API至遠端並登入
+    //         axios.post(`${url}/admin/sign`, user)
+    //             .then((res) => {
+    //                 // 先取出token在存入
+    //                 const { token, expired } = res.data;
+    //                 document.cookie = `mytoken=${token};expired=${new Date(expired)};`;
+    //             })
+    //             .catch((error) => { })
+    //     };
+
+
+    
+
+</script>
+</body>
+
+</html>
